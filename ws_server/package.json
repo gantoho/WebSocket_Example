@@ -1,0 +1,16 @@
+{
+  "name": "ws_server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node ./app.js",
+    "start": "pnpm i && pnpm dev" 
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "nodejs-websocket": "^1.7.2"
+  }
+}

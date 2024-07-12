@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    *{
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+</head>
+<body>
+  <table>
+    <tr>
+      <td>
+        <canvas id="myCanvas" width="350" height="350" style="border:1px solid #000000;"></canvas>
+      </td>
+      <td>
+        <form name="inputForm">
+          <table>
+            <tr>
+                <th>颜色</th>
+                <td><input type="radio" name="color" value="#FF0000" checked="true">红</td>
+                <td><input type="radio" name="color" value="#0000FF">蓝</td>
+                <td><input type="radio" name="color" value="#FF9900">橙</td>
+                <td><input type="radio" name="color" value="#33CC33">绿</td>
+            </tr>
+            <tr>
+                <th>形状</th>
+                <td><input type="radio" name="shape" value="square" checked="true">方块</td>
+                <td><input type="radio" name="shape" value="circle">圆</td>
+                <td> </td>
+                <td></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" checked="true" id="tb">同步</td>
+            </tr>
+          </table>
+        </form>
+      </td>
+    </tr>
+  </table>
+
+  <script>
+    // websocket客户端案例
+    // 1.创建websocket 并与服务器建立连接通道
+    let ws = new WebSocket("ws://localhost:9898");
+
+    let canvas = document.getElementById("myCanvas");
+    let context = canvas.getContext("2d");
+
+    // 设置websocket 接收消息事件
+    ws.onmessage = (e) => {
+      // console.log(JSON.parse(e.data.toLowerCase()));
+      const data = JSON.parse(e.data.toLowerCase())
+      if(data.shape === 'square' && data.shape != undefined) {
+        context.fillStyle = data.color;
+        context.fillRect(data.x-5,data.y-5,10,10);
+      }else if(data.shape === 'circle' && data.shape != undefined){
+        context.beginPath();
+        context.arc(data.x, data.y, 5, 0, 2 * Math.PI, true);
+        context.closePath();//关闭路径
+        context.fillStyle = data.color;//设置填充颜色
+        context.fill();//开始填充
+      }
+      
+    }
+    
+    // 按钮的点击事件
+    // document.querySelector('.btn').onclick = () => {
+    //   // 发送消息
+    //   ws.send('你好，我是客户端');
+      
+    // }
+
+    const color = document.querySelectorAll('form tr:nth-child(1) input')
+    let json_ = {x: 0, y: 0, color: '#FF0000', shape: 'square'}
+    document.querySelector('form tr:nth-child(1)').onclick = () => {
+      for(let i of color) {
+        if(i.checked) {
+          json_.color = i.value
+          console.log(i.value)
+        }
+      }
+    }
+
+    const shape = document.querySelectorAll('form tr:nth-child(2) input')
+    document.querySelector('form tr:nth-child(2)').onclick = () => {
+      for(let i of shape) {
+        if(i.checked) {
+          json_.shape = i.value
+          console.log(i.value)
+        }
+      }
+    }
+
+    
+    canvas.addEventListener("mousemove", e => {
+      // console.log(e.pageX, e.pageY, e.offsetX, e.offsetY);
+      json_.x = e.offsetX
+      json_.y = e.offsetY
+      console.log(json_)
+      if(document.querySelector('#tb').checked) {
+        ws.send(JSON.stringify(json_));
+      }else{
+        console.log(11111111)
+        if(json_.shape === 'square') {
+          context.fillStyle = json_.color;
+          context.fillRect(json_.x-5,json_.y-5,10,10);
+        }else if(json_.shape === 'circle'){
+          context.beginPath();
+          context.arc(json_.x, json_.y, 5, 0, 2 * Math.PI, true);
+          context.closePath();//关闭路径
+          context.fillStyle = json_.color;//设置填充颜色
+          context.fill();//开始填充
+        }
+      }
+    });
+    
+  </script>
+</body>
+</html>
